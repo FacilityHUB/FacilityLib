@@ -5286,8 +5286,13 @@ function WindowFunctions:BuildHomeTab()
 
     changelogSection:Header({ Text = "Changelogs" })
 
+    changelogSection:Paragraph({
+    Header = "V2.5.6 - Latest",
+    Body = "- Optimization All Farm\n- Added Priority System (multi-farm with priority order)"
+})
+
 	    changelogSection:Paragraph({
-        Header = "V2.5.6 - Latest",
+        Header = "V2.5.6c",
         Body = "- Added New Auto Questline (BETA)\n- Added Config System in Settings\n- Added Compatibility Mobile"
     })
 
