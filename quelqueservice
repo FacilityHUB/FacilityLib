@@ -1,0 +1,1705 @@
+interactablebase
+
+-- Script Path: game:GetService("ReplicatedStorage").Content.Collectables.Classes.InteractableBase.InteractableBase
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+u1.__index = u1;
+game:GetService("ReplicatedStorage");
+
+function u1.new(p2) -- Line: 6
+    -- upvalues: u1 (copy)
+    return setmetatable({
+        CollectableClient = p2
+    }, u1);
+end;
+
+function u1.Initialize(p3) -- Line: 14
+    p3.PositionProperty = p3.CollectableClient:AwaitProperty("Position");
+    p3.NameProperty = p3.CollectableClient:AwaitProperty("Name");
+    p3.Model = game.ReplicatedStorage.Content.Collectables.Items[p3.NameProperty.Value].Visual:Clone();
+    p3.Model:PivotTo(p3.PositionProperty.Value);
+
+    for _, descendant in ipairs(p3.Model:GetDescendants()) do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = false;
+            descendant.CanTouch = false;
+            descendant.CanQuery = true;
+            descendant.Anchored = true;
+        end;
+    end;
+
+    p3.Model.PrimaryPart.Transparency = 1;
+    p3.Model.Parent = workspace.Effects.Collectables.Interactables;
+    p3.Model.Name = p3.NameProperty.Value;
+    p3.Model:SetAttribute("InteractName", "InteractableBaseClient.Collect");
+end;
+
+function u1.Interact(p4) -- Line: 34
+    local Attachment = Instance.new("Attachment", workspace.Terrain);
+    Attachment.Position = p4.Model.PrimaryPart.Position;
+    local v5 = script.Collect:Clone();
+    v5.Parent = Attachment;
+    v5:Play();
+    game:GetService("Debris"):AddItem(Attachment, 1);
+    p4.Model:Destroy();
+end;
+
+function u1.OnClientCollect(p6) -- Line: 44
+end;
+
+function u1.GetCollectableModel(p7) -- Line: 48
+    return p7.Model;
+end;
+
+function u1.Step(p8, p9) -- Line: 52
+end;
+
+function u1.Destroy(p10) -- Line: 56
+    p10.Model:Destroy();
+
+    for i, _ in pairs(p10) do
+        p10[i] = nil;
+    end;
+end;
+
+return u1;
+
+
+behavior
+
+-- Script Path: game:GetService("ReplicatedStorage").Content.Collectables.Classes.InteractableBase.Behavior
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+return {
+    DefaultDuration = nil,
+    CollectionMethod = {
+        Method = "Interaction"
+    },
+    Interactions = { {
+            Name = "Collect",
+            Keybind = "Interact",
+            KeybindName = "E",
+            Collector = true,
+            Active = true
+        } },
+    Properties = { { "Position" }, { "Name" } }
+};
+
+
+Interaction
+
+-- Script Path: game:GetService("ReplicatedStorage").Content.Collectables.CollectionMethods.Interaction
+-- Took 0.01s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+u1.__index = u1;
+game:GetService("Players");
+
+function u1.new(p2, p3) -- Line: 6
+    -- upvalues: u1 (copy)
+    return setmetatable({
+        CollectableClient = p2,
+        Info = p3
+    }, u1);
+end;
+
+function u1.Initialize(p4) -- Line: 15
+end;
+
+function u1.Interact(p5, p6, p7, p8) -- Line: 19
+    for _, v in ipairs(p6.Interactions) do
+        if v.Keybind == p7 and v.Collector then
+            p5.CollectableClient:Collect();
+        end;
+    end;
+end;
+
+function u1.Step(p9, p10) -- Line: 27
+end;
+
+function u1.Destroy(p11) -- Line: 31
+    for i, _ in pairs(p11) do
+        p11[i] = nil;
+    end;
+end;
+
+return u1;
+
+
+distance
+
+-- Script Path: game:GetService("ReplicatedStorage").Content.Collectables.CollectionMethods.Distance
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+u1.__index = u1;
+local LocalPlayer = game:GetService("Players").LocalPlayer;
+
+function u1.new(p2, p3) -- Line: 7
+    -- upvalues: u1 (copy)
+    return setmetatable({
+        CollectableClient = p2,
+        Info = p3
+    }, u1);
+end;
+
+function u1.Initialize(p4) -- Line: 16
+end;
+
+function u1.Step(u5, p6) -- Line: 20
+    -- upvalues: LocalPlayer (copy)
+    local CollectableModel = u5.CollectableClient:GetCollectableModel();
+    local Character = LocalPlayer.Character;
+
+    if CollectableModel and (Character and (Character.PrimaryPart and ((Character.PrimaryPart.Position - CollectableModel.PrimaryPart.Position).Magnitude <= u5.Info.Range and not u5.Collecting))) then
+        task.spawn(function() -- Line: 26
+            -- upvalues: u5 (copy)
+            u5.Collecting = true;
+            u5.CollectableClient:TryCollect();
+            u5.Collecting = false;
+        end);
+    end;
+end;
+
+function u1.Destroy(p7) -- Line: 36
+    for i, _ in pairs(p7) do
+        p7[i] = nil;
+    end;
+end;
+
+return u1;
+
+
+CameraService
+
+-- Script Path: game:GetService("ReplicatedStorage").Services.Client.CameraService
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+
+if game:GetService("RunService"):IsServer() then
+    return nil;
+end;
+
+function tween(p2, p3, p4, p5, p6, p7)
+    local TweenInfo_new_ret = TweenInfo.new(p4, p5, p6, 0, p7, 0);
+    local v8 = game:GetService("TweenService"):Create(p2, TweenInfo_new_ret, p3);
+    v8:Play();
+
+    return v8;
+end;
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local Services = ReplicatedStorage:WaitForChild("Services");
+local EffectsService = require(Services:WaitForChild("Client"):WaitForChild("EffectsService"));
+local Shared = ReplicatedStorage:WaitForChild("Shared");
+local useSettings = require(Shared:WaitForChild("UserData"):WaitForChild("ClientHooks"):WaitForChild("useSettings"));
+u1.Settings = require(script.BaseSettings);
+u1.FOVAdjusters = {};
+u1.FOVAdjusting = {};
+u1.BaseFOV = 70;
+u1.MaxY = 80;
+u1.MinY = -80;
+u1.ShiftLockEnabled = false;
+u1.ShiftLockCache = {};
+u1.OffsetCFrames = {};
+u1.CameraCenterOffset = CFrame.new();
+u1.OriginOffsets = {
+    Default = Vector3.new()
+};
+u1.FOVTweens = {};
+
+function u1.Update(p9: table, p10: number) -- Line: 52
+    local BaseFOV = p9.BaseFOV;
+
+    for _, v in pairs(p9.FOVAdjusters) do
+        BaseFOV = BaseFOV * v;
+    end;
+
+    workspace.CurrentCamera.FieldOfView = BaseFOV;
+end;
+
+function u1.SetBaseFOV(p11, p12) -- Line: 60
+    -- upvalues: useSettings (copy), u1 (copy)
+    if p12 then
+        u1.Overridden = true;
+    else
+        p12 = useSettings.Get("FOV");
+        u1.Overridden = false;
+    end;
+
+    u1.BaseFOV = p12;
+end;
+
+function u1.TweenOriginOffset(u13, u14, p15) -- Line: 70
+    -- upvalues: u1 (copy), EffectsService (copy)
+    if not u1.TweenOffset then
+        u1.TweenOffset = Instance.new("Vector3Value");
+    end;
+
+    local u16 = tick();
+    u1.TweeningOffset = u16;
+    u1.TweenOffset.Value = u1.OriginOffsets.Default;
+    EffectsService:PlayEffect("Tween", u1.TweenOffset, {
+        Value = p15
+    }, u14, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut);
+    task.spawn(function() -- Line: 78
+        -- upvalues: u13 (copy), u16 (copy), u14 (copy)
+        repeat
+            u13.OriginOffsets.Default = u13.TweenOffset.Value;
+            task.wait();
+        until u14 <= tick() - u16 or u13.TweeningOffset ~= u16;
+
+        if u13.TweeningOffset == u16 then
+            u13.TweeningOffset = nil;
+        end;
+    end);
+end;
+
+function u1.KeyUsed(p17, p18) -- Line: 89
+end;
+
+function u1.SetSubject(p19, p20) -- Line: 93
+    -- upvalues: u1 (copy)
+    u1.CameraSubject = p20;
+end;
+
+function u1.SetFakeSubject(p21, p22) -- Line: 97
+    -- upvalues: u1 (copy)
+    u1.FakeCameraSubject = p22;
+end;
+
+function u1.ReturnCFrameAndFocus(p23, p24, p25, p26) -- Line: 101
+    -- upvalues: u1 (copy)
+    if u1.CameraSubject then
+        return u1:UpdateCameraTransition(u1.CameraSubject.CFrame, u1.CameraSubject.CFrame, p26);
+    end;
+
+    if not game.Players.LocalPlayer:GetAttribute("VR") then
+        p24 = u1:LimitByDeadzone(p24);
+    end;
+
+    u1.CameraCFrame = p24;
+    u1.CameraFocus = p25;
+    local v27, v28 = u1:SetOffsets(p24, p25);
+    local v29, v30 = u1:UpdateCameraTransition(v27, v28, p26);
+
+    if u1.FakeCameraSubject then
+        return u1:UpdateCameraTransition(u1.FakeCameraSubject.CFrame, u1.FakeCameraSubject.CFrame, p26);
+    end;
+
+    return v29, v30;
+end;
+
+function u1.LimitByDeadzone(p31, p32) -- Line: 119
+    -- upvalues: u1 (copy)
+    if u1.maxDeadzone and (u1.minDeadzone and (u1.CameraDeadzone or game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.PrimaryPart)) then
+        local v33, v34, v35 = p32:ToOrientation();
+        local _, v36, _ = (u1.CameraDeadzone or game.Players.LocalPlayer.Character.PrimaryPart).CFrame:ToOrientation();
+
+        if math.abs(v34 - v36) >= 3.141592653589793 then
+            local v37;
+
+            if v34 > 0 then
+                v37 = 3.141592653589793 - v34;
+            else
+                v37 = -3.141592653589793 - v34;
+            end;
+
+            local v38;
+
+            if v36 > 0 then
+                v38 = 3.141592653589793 - v36;
+            else
+                v38 = -3.141592653589793 - v36;
+            end;
+
+            v36 = v34 + (v37 - v38);
+        end;
+
+        local CFrame_new_ret = CFrame.new();
+
+        if u1.maxDeadzone + v36 >= u1.minDeadzone + v36 then
+            CFrame_new_ret = CFrame.Angles(0, math.clamp(v34, u1.minDeadzone + v36, u1.maxDeadzone + v36), 0);
+        end;
+
+        p32 = CFrame.new(p32.p) * CFrame_new_ret * CFrame.Angles(v33, 0, v35);
+    end;
+
+    return p32;
+end;
+
+function u1.SetDeadzonePart(p39, p40) -- Line: 152
+    -- upvalues: u1 (copy)
+    u1.CameraDeadzone = p40;
+end;
+
+function u1.SetMinDeadzone(p41, p42) -- Line: 156
+    -- upvalues: u1 (copy)
+    u1.minDeadzone = p42;
+end;
+
+function u1.SetMaxDeadzone(p43, p44) -- Line: 160
+    -- upvalues: u1 (copy)
+    u1.maxDeadzone = p44;
+end;
+
+function u1.ReturnCFrameAndFocusWithoutController(p45, p46) -- Line: 165
+    -- upvalues: u1 (copy)
+    if u1.CameraSubject and u1.CameraSubject.Parent then
+        Vector3.new();
+        local CFrame2 = u1.CameraSubject.CFrame;
+        local CFrame3 = u1.CameraSubject.CFrame;
+        u1.CameraCFrame = CFrame2;
+        u1.CameraFocus = CFrame3;
+        local v47, v48 = u1:UpdateCameraTransition(CFrame2, CFrame3, p46);
+
+        return v47, v48;
+    end;
+end;
+
+function u1.SetCFrame(p49, p50) -- Line: 178
+    -- upvalues: u1 (copy)
+    u1.CameraCFrame = p50;
+    workspace.CurrentCamera.CFrame = p50;
+end;
+
+function u1.Transition(p51, p52) -- Line: 183
+    p51.CameraTransition = {
+        lastGoal = workspace.CurrentCamera.CFrame,
+        lastFocus = workspace.CurrentCamera.Focus,
+        lastTick = tick(),
+        lastDuration = p52
+    };
+end;
+
+function u1.UpdateCameraTransition(p53, p54, p55, p56) -- Line: 193
+    -- upvalues: u1 (copy)
+    if not u1.CameraTransition then
+        return p54, p55;
+    end;
+
+    if u1.CameraTransition.lastTick and tick() - u1.CameraTransition.lastTick >= u1.CameraTransition.lastDuration then
+        u1.CameraTransition = nil;
+
+        return p54, p55;
+    end;
+
+    if u1.CameraTransition.lastTick then
+        local v57 = 3.141592653589793 * ((tick() - u1.CameraTransition.lastTick) / u1.CameraTransition.lastDuration) * 0.5;
+        local math_sin_ret = math.sin(v57);
+        p54 = u1.CameraTransition.lastGoal:lerp(p54, math_sin_ret);
+        p55 = u1.CameraTransition.lastFocus:lerp(p55, math_sin_ret);
+    end;
+
+    return p54, p55;
+end;
+
+function u1.SetOffsets(p58, p59, p60) -- Line: 208
+    -- upvalues: u1 (copy)
+    local v61 = CFrame.new(p59.p) * u1.CameraCenterOffset * (p59 - p59.p);
+
+    for _, v in pairs(u1.OffsetCFrames) do
+        v61 = v61 * v;
+    end;
+
+    return v61, p60;
+end;
+
+function u1.GetCFrame(p62) -- Line: 216
+    -- upvalues: u1 (copy)
+    return u1.CameraCFrame or CFrame.new();
+end;
+
+function u1.GetFocus(p63) -- Line: 220
+    -- upvalues: u1 (copy)
+    return u1.CameraFocus or CFrame.new();
+end;
+
+function u1.TweenFOV(p64: table, u65: string, p66: number, u67: number) -- Line: 224
+    -- upvalues: u1 (copy)
+    if not u1.FOVTweens[u65] then
+        u1.FOVTweens[u65] = { Instance.new("NumberValue") };
+        u1.FOVTweens[u65][1].Value = 1;
+    end;
+
+    local u68 = u1.FOVTweens[u65];
+    tween(u68[1], {
+        Value = p66
+    }, u67, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, false);
+    local u69 = tick();
+    u68[2] = u69;
+    task.spawn(function() -- Line: 233
+        -- upvalues: u1 (ref), u65 (copy), u68 (copy), u69 (copy), u67 (copy)
+        repeat
+            u1:AdjustFOV(u65, u68[1].Value);
+            task.wait();
+        until not (u1.FOVTweens[u65] and (u68[2] == u69 and u67 > tick() - u69));
+
+        if u1.FOVTweens[u65] and u68[2] == u69 then
+            task.wait(60);
+
+            if u68[2] == u69 and u1.FOVTweens[u65] then
+                u1.FOVTweens[u65][1]:Destroy();
+                u1.FOVTweens[u65] = nil;
+            end;
+        end;
+    end);
+end;
+
+function u1.AdjustFOV(p70: table, p71: string, p72: number, p73: boolean) -- Line: 250
+    -- upvalues: u1 (copy)
+    u1.FOVAdjusters[p71] = p72;
+
+    if p73 then
+        u1.FOVTweens[p71] = nil;
+    end;
+end;
+
+function u1.GetAdjustedFOV(p74: table, p75: string) -- Line: 257
+    -- upvalues: u1 (copy)
+    return u1.FOVAdjusters[p75] or 1;
+end;
+
+game:GetService("RunService").RenderStepped:Connect(function(p76) -- Line: 261
+    -- upvalues: u1 (copy)
+    u1:Update(p76);
+end);
+
+function u1.ToggleShiftLock(p77, p78) -- Line: 265
+    -- upvalues: u1 (copy)
+    u1.ShiftLockEnabled = p78;
+end;
+
+function u1.SetMaxY(p79, p80) -- Line: 269
+    p79.MaxY = p80;
+end;
+
+function u1.SetMinY(p81, p82) -- Line: 273
+    p81.MinY = p82;
+end;
+
+function u1.SetShiftLockOffset(p83, p84, p85, p86) -- Line: 277
+    -- upvalues: u1 (copy), EffectsService (copy)
+    local v87 = p86 == nil and "Default" or p86;
+
+    if u1.ShiftLockCache[v87] == nil then
+        u1.ShiftLockCache[v87] = { Instance.new("Vector3Value") };
+        u1.ShiftLockCache[v87][1].Value = Vector3.new();
+    end;
+
+    local v88 = u1.ShiftLockCache[v87];
+
+    if u1.ShiftLockCache[v87][2] then
+        local v89 = v88[1];
+        v88[2]:Cancel();
+        v88[2] = nil;
+        v88[1] = v89;
+    end;
+
+    if (p85 or 0) == 0 then
+        v88[1].Value = p84;
+
+        return;
+    end;
+
+    v88[2] = EffectsService:PlayEffect("Tween", v88[1], {
+        Value = p84
+    }, p85 or 0, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut);
+end;
+
+function u1.GetShiftLockOffset(p90) -- Line: 301
+    -- upvalues: u1 (copy)
+    local Vector3_new_ret = Vector3.new();
+
+    for _, v in pairs(u1.ShiftLockCache) do
+        Vector3_new_ret = Vector3_new_ret + v[1].Value;
+    end;
+
+    return Vector3_new_ret;
+end;
+
+function u1.SetCameraOffset(p91, p92, p93) -- Line: 309
+    -- upvalues: u1 (copy)
+    u1.OffsetCFrames[p92] = p93;
+end;
+
+useSettings.Changed:Connect(function() -- Line: 313
+    -- upvalues: u1 (copy)
+    if u1.Overridden then
+        return;
+    end;
+
+    u1:SetBaseFOV(nil);
+end);
+u1:SetBaseFOV(nil);
+
+return u1;
+
+
+BaseSettings
+
+-- Script Path: game:GetService("ReplicatedStorage").Services.Client.CameraService.BaseSettings
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+return {
+    MouseLock = {
+        Enabled = true,
+        Offset = Vector3.new(2, 0, 0)
+    }
+};
+
+
+Fakeinput
+
+-- Script Path: game:GetService("ReplicatedStorage").Shared.Client.Input.FakeInput
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+u1.__index = u1;
+u1.KeyCode = Enum.KeyCode.Unknown;
+u1.UserInputType = Enum.UserInputType.None;
+u1.UserInputState = Enum.UserInputState.None;
+u1.Position = Vector3.new(0, 0, 0);
+u1.Emulated = true;
+
+local function OverrideAsDefault(p2, p3, p4) -- Line: 19
+    if p2[p3] == nil then
+        p2[p3] = p4;
+    end;
+end;
+
+function u1.raw(p5) -- Line: 26
+    return setmetatable(p5, nil);
+end;
+
+function u1.from(p6: any, p7: table) -- Line: 30
+    -- upvalues: u1 (copy)
+    local v8 = p7 == nil and {} or p7;
+    local KeyCode = p6.KeyCode;
+
+    if v8.KeyCode == nil then
+        v8.KeyCode = KeyCode;
+    end;
+
+    local UserInputType = p6.UserInputType;
+
+    if v8.UserInputType == nil then
+        v8.UserInputType = UserInputType;
+    end;
+
+    local UserInputState = p6.UserInputState;
+
+    if v8.UserInputState == nil then
+        v8.UserInputState = UserInputState;
+    end;
+
+    local Position = p6.Position;
+
+    if v8.Position == nil then
+        v8.Position = Position;
+    end;
+
+    return u1.new(v8);
+end;
+
+function u1.new(p9: table) -- Line: 39
+    -- upvalues: u1 (copy)
+    local v10 = {};
+
+    for i, v in pairs(p9) do
+        if u1[i] then
+            v10[i] = v;
+        else
+            error("Invalid input property value.");
+        end;
+    end;
+
+    return setmetatable(v10, u1);
+end;
+
+function u1.IsFake(p11) -- Line: 55
+    return typeof(p11) ~= "Instance";
+end;
+
+return u1;
+
+GameActionService
+
+-- Script Path: game:GetService("ReplicatedStorage").Shared.Client.Input.GameActionService
+-- Took 0.01s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
+game:GetService("RunService");
+local Bucket = require(ReplicatedStorage.Shared.Generics.Bucket);
+require(ReplicatedStorage.Shared.Client.Input.FakeInput);
+local InputLocker = require(ReplicatedStorage.Shared.Client.Input.InputLocker);
+u1.Binds = {};
+u1.Actions = {};
+local u2 = {};
+u2.__index = u2;
+
+local function Process(p3: userdata, p4: userdata, p5: any) -- Line: 21
+    for _, v in p3 do
+        if v:Execute(p4, p5) == Enum.ContextActionResult.Sink then
+            p5 = true;
+        end;
+    end;
+
+    return p5;
+end;
+
+function u2.new(p6: string?) -- Line: 33
+    -- upvalues: Bucket (copy), u2 (copy)
+    local v7 = {
+        Functions = Bucket.new()
+    };
+    v7.Functions.Reversed = true;
+    v7.Name = p6;
+    v7.Enums = {};
+
+    return setmetatable(v7, u2);
+end;
+
+function u2.Execute(p8: table, p9: any, p10: boolean) -- Line: 44
+    -- upvalues: Process (copy)
+    return Process(p8.Functions, p9, p10);
+end;
+
+function u2.AddEnum(p11, ...) -- Line: 49
+    -- upvalues: u1 (copy), Bucket (copy)
+    for _, v in ipairs({ ... }) do
+        p11.Enums[v] = true;
+
+        if u1.Binds[v] == nil then
+            u1.Binds[v] = Bucket.new();
+            u1.Binds[v].Reversed = true;
+        end;
+
+        local v12 = v;
+
+        for i, v2 in p11.Functions do
+            u1.Binds[v12]:Add(i, v2);
+        end;
+    end;
+end;
+
+u2.SetActionTrigger = u2.AddEnum;
+
+function u2.RemoveEnum(p13, p14) -- Line: 65
+    -- upvalues: u1 (copy)
+    if p13.Enums[p14] then
+        local v15 = u1.Binds[p14];
+
+        if v15 then
+            for i, v in v15 do
+                if v.Holder == p13 then
+                    v15:RemoveKnown(i, v);
+                end;
+            end;
+
+            if v15:IsEmpty() then
+                u1.Binds[p14] = nil;
+            end;
+        end;
+
+        p13.Enums[p14] = nil;
+    end;
+end;
+
+function u2.IsValid(p16, p17) -- Line: 84
+    -- upvalues: InputLocker (copy)
+    local RepresentingEnums = InputLocker.GetRepresentingEnums(p17);
+
+    for _, v in ipairs(RepresentingEnums) do
+        if p16.Enums[v] then
+            return true;
+        end;
+    end;
+
+    return false;
+end;
+
+function u2.Insert(p18, p19, p20) -- Line: 96
+    -- upvalues: u1 (copy)
+    if typeof(p20) == "EnumItem" and p20.EnumType == Enum.ContextActionPriority then
+        p20 = p20.Value;
+    elseif typeof(p20) ~= "number" then
+        if typeof(p20) == "nil" then
+            p20 = Enum.ContextActionPriority.Medium.Value;
+        else
+            error("Wrong priority value");
+        end;
+    end;
+
+    if p20 <= 100 then
+        warn("first warning, remove if u want, priorities are values ranging from 0-4000 btw");
+        warn("medium is 2000, high is 3000, low is 1000");
+    end;
+
+    if math.floor(p20) ~= p20 then
+        error("Can\'t be decimal");
+    end;
+
+    p19:SetPriority(p20);
+    p19:SetHolder(p18);
+    p18.Functions:Add(p20, p19);
+
+    for i, _ in pairs(p18.Enums) do
+        local v21 = u1.Binds[i];
+
+        if v21 then
+            v21:Add(p20, p19);
+        end;
+    end;
+end;
+
+function u2.Remove(p22, p23) -- Line: 129
+    -- upvalues: u1 (copy)
+    p22.Functions:RemoveKnown(p23.Priority, p23);
+
+    for i, _ in pairs(p22.Enums) do
+        local v24 = u1.Binds[i];
+
+        if v24 then
+            v24:RemoveKnown(p23.Priority, p23);
+        end;
+    end;
+
+    if p22.Functions:IsEmpty() then
+        p22:Destroy();
+    end;
+end;
+
+function u2.Destroy(p25) -- Line: 144
+    -- upvalues: u1 (copy)
+    for i, _ in pairs(p25.Enums) do
+        local v26 = u1.Binds[i];
+
+        if v26 then
+            for i2, v in p25.Functions do
+                v26:RemoveKnown(i2, v);
+            end;
+        end;
+    end;
+
+    if p25.Name then
+        u1.Actions[p25.Name] = nil;
+    end;
+
+    for i, _ in pairs(p25) do
+        p25[i] = nil;
+    end;
+
+    setmetatable(p25, nil);
+end;
+
+local u27 = {};
+u27.__index = u27;
+
+function u27.new(p28) -- Line: 168
+    -- upvalues: u27 (copy)
+    return setmetatable({
+        Caller = p28
+    }, u27);
+end;
+
+function u27.Execute(p29, ...) -- Line: 176
+    return p29.Caller(...);
+end;
+
+function u27.Disconnect(p30) -- Line: 180
+    p30.Holder:Remove(p30);
+    p30:Destroy();
+end;
+
+function u27.SetPriority(p31: table, p32: number) -- Line: 185
+    p31.Priority = p32;
+end;
+
+function u27.SetHolder(p33, p34) -- Line: 189
+    p33.Holder = p34;
+end;
+
+function u27.Destroy(p35) -- Line: 193
+    for i, _ in pairs(p35) do
+        p35[i] = nil;
+    end;
+
+    setmetatable(p35, nil);
+end;
+
+function u1.GetActionHolder(p36: string) -- Line: 200
+    -- upvalues: u1 (copy), u2 (copy)
+    if u1.Actions[p36] == nil then
+        u1.Actions[p36] = u2.new(p36);
+    end;
+
+    return u1.Actions[p36];
+end;
+
+function u1.GetActionBinds(p37: string) -- Line: 209
+    -- upvalues: u1 (copy)
+    local ActionHolder = u1.GetActionHolder(p37);
+
+    return not ActionHolder and {} or ActionHolder.Enums;
+end;
+
+function u1.BindAction(p38: string?, p39: function, p40: number) -- Line: 219
+    -- upvalues: u1 (copy), u27 (copy), u2 (copy)
+    if p38 then
+        local ActionHolder = u1.GetActionHolder(p38);
+        local v41 = u27.new(p39, p38);
+        ActionHolder:Insert(v41, p40);
+
+        return v41;
+    end;
+
+    local v42 = u27.new(p39);
+    local v43 = u2.new(nil);
+    v43:Insert(v42, p40);
+
+    return v42, v43;
+end;
+
+function u1.SetActionTrigger(p44: string, ...) -- Line: 233
+    -- upvalues: u1 (copy)
+    local ActionHolder = u1.GetActionHolder(p44);
+    local v45 = 1;
+    local v46 = { ... };
+
+    while v45 > 0 and v45 <= #v46 do
+        local v47 = v46[v45];
+
+        if typeof(v47) == "table" then
+            for _, v in ipairs(v47) do
+                ActionHolder:AddEnum(v);
+            end;
+        else
+            ActionHolder:AddEnum(v47);
+        end;
+
+        v45 = v45 + 1;
+    end;
+end;
+
+function u1.ProcessBind(p48, p49) -- Line: 252
+    -- upvalues: u1 (copy), Process (copy)
+    local v50 = u1.Binds[p48];
+
+    if v50 then
+        return Process(v50, p48, p49);
+    end;
+end;
+
+u1.PresetBinds = {
+    Activator = { Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch }
+};
+
+function u1.CallKeybind(p51: any, p52: boolean?) -- Line: 266
+    -- upvalues: InputLocker (copy), u1 (copy), Process (copy)
+    local v53 = typeof(p52) == "nil";
+
+    for _, v in ipairs(InputLocker.GetRepresentingEnums(p51)) do
+        local v54 = u1.Binds[v];
+
+        if v54 then
+            if v53 then
+                Process(v54, p51, false);
+            else
+                p52 = Process(v54, p51, p52);
+            end;
+        end;
+    end;
+
+    return p52;
+end;
+
+function u1.SpecificAction(p55: string, p56: any, p57: any) -- Line: 290
+    -- upvalues: u1 (copy)
+    local v58 = u1.Actions[p55];
+
+    if v58 then
+        v58:Execute(p56, p57);
+    end;
+end;
+
+InputLocker.InputRecieved:Connect(u1.CallKeybind);
+
+return u1;
+
+
+InputLocker
+
+-- Script Path: game:GetService("ReplicatedStorage").Shared.Client.Input.InputLocker
+-- Took 0s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local UserInputService = game:GetService("UserInputService");
+local RunService = game:GetService("RunService");
+local Signal = require(ReplicatedStorage.Shared.Generics.Signal);
+local AnyValue = require(ReplicatedStorage.Shared.Generics.AnyValue);
+local FakeInput = require(ReplicatedStorage.Shared.Client.Input.FakeInput);
+local u2 = {
+    [Enum.UserInputType.MouseMovement] = true,
+    [Enum.UserInputType.TextInput] = true,
+    [Enum.UserInputType.Focus] = true
+};
+local u3 = {
+    [Enum.UserInputType.MouseMovement] = "Desktop",
+    [Enum.UserInputType.MouseButton1] = "Desktop",
+    [Enum.UserInputType.MouseButton2] = "Desktop",
+    [Enum.UserInputType.MouseButton3] = "Desktop",
+    [Enum.UserInputType.MouseWheel] = "Desktop",
+    [Enum.UserInputType.Keyboard] = "Desktop",
+    [Enum.UserInputType.Touch] = "Mobile",
+    [Enum.UserInputType.Gamepad1] = "Gamepad",
+    [Enum.UserInputType.Gamepad2] = "Gamepad",
+    [Enum.UserInputType.Gamepad3] = "Gamepad",
+    [Enum.UserInputType.Gamepad4] = "Gamepad",
+    [Enum.UserInputType.Gamepad5] = "Gamepad",
+    [Enum.UserInputType.Gamepad6] = "Gamepad",
+    [Enum.UserInputType.Gamepad7] = "Gamepad",
+    [Enum.UserInputType.Gamepad8] = "Gamepad"
+};
+local u4 = {
+    [Enum.KeyCode.A] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.B] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.C] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.D] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.E] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.F] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.G] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.H] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.I] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.J] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.K] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.L] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.M] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.N] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.O] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.P] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Q] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.R] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.S] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.T] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.U] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.V] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.W] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.X] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Y] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Z] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Zero] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.One] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Two] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Three] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Four] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Five] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Six] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Seven] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Eight] = Enum.UserInputType.Keyboard,
+    [Enum.KeyCode.Nine] = Enum.UserInputType.Keyboard
+};
+local u5 = {};
+local v6 = UserInputService.TouchEnabled and "Mobile" or (UserInputService.GamepadEnabled and "Gamepad" or "Desktop");
+u1.InputRecieved = Signal.new();
+u1.InputMode = AnyValue.new(v6);
+u1.Locked = AnyValue.new(false);
+
+function u1.GetRepresentingEnums(p7) -- Line: 89
+    local v8 = {};
+
+    if p7.UserInputType ~= Enum.UserInputType.None then
+        table.insert(v8, p7.UserInputType);
+    end;
+
+    if p7.KeyCode ~= Enum.KeyCode.Unknown then
+        table.insert(v8, p7.KeyCode);
+    end;
+
+    return v8;
+end;
+
+function u1.IsSafeInput(p9) -- Line: 103
+    -- upvalues: u4 (copy), u3 (copy), u1 (copy)
+    if p9.EnumType ~= Enum.KeyCode then
+        return u3[p9] == u1.InputMode.Value;
+    end;
+
+    local v10 = u4[p9];
+
+    if v10 ~= nil then
+        return u3[v10] == u1.InputMode.Value;
+    end;
+
+    warn("Can\'t establish input origin.");
+
+    return false;
+end;
+
+function u1.GetCorrespondingInput(p11) -- Line: 118
+    -- upvalues: u1 (copy)
+    if typeof(p11) ~= "table" then
+        if u1.IsSafeInput(p11) then
+            return p11;
+        end;
+
+        return nil;
+    end;
+
+    for _, v in ipairs(p11) do
+        if u1.IsSafeInput(v) then
+            return v;
+        end;
+    end;
+end;
+
+function u1.Get(p12, p13) -- Line: 134
+    -- upvalues: u1 (copy)
+    local RepresentingEnums = u1.GetRepresentingEnums(p13);
+    local v14 = nil;
+
+    for _, v in ipairs(RepresentingEnums) do
+        if p12[v] then
+            if v14 == nil then
+                v14 = p12[v];
+            else
+                warn("This input has 2 values representing it in this dictionary, detecting the top most value.");
+            end;
+        end;
+    end;
+
+    return v14;
+end;
+
+local function ProcessInput(p15, p16) -- Line: 151
+    -- upvalues: u1 (copy), u3 (copy), u2 (copy), u5 (copy)
+    local RepresentingEnums = u1.GetRepresentingEnums(p15);
+    local v17 = u1.Get(u3, p15);
+    local v18 = u1.Get(u2, p15);
+
+    if v17 == nil then
+        if v18 then
+            u1.InputRecieved:Fire(p15, p16);
+
+            return;
+        end;
+
+        warn("Unable to detect Input Platform: ", table.unpack(RepresentingEnums));
+
+        return;
+    end;
+
+    if not (v18 or u1.Locked.Value) then
+        u1.InputMode.Value = v17;
+    end;
+
+    if v17 == u1.InputMode.Value then
+        if p15.UserInputState == Enum.UserInputState.Begin then
+            table.insert(u5, p15);
+        else
+            local v19 = p15.UserInputState == Enum.UserInputState.End and table.find(u5, p15);
+
+            if v19 then
+                table.remove(u5, v19);
+            end;
+        end;
+
+        u1.InputRecieved:Fire(p15, p16);
+    end;
+end;
+
+u1.InputMode.Changed:Connect(function() -- Line: 187
+    -- upvalues: u5 (copy), FakeInput (copy), u1 (copy)
+    for _, v in ipairs(u5) do
+        local v20 = FakeInput.from(v, {
+            Emulated = true,
+            UserInputState = Enum.UserInputState.End
+        });
+        u1.InputRecieved:Fire(v20, false);
+    end;
+
+    table.clear(u5);
+end);
+UserInputService.InputBegan:Connect(ProcessInput);
+UserInputService.InputChanged:Connect(ProcessInput);
+UserInputService.InputEnded:Connect(ProcessInput);
+u1.EmulateInput = ProcessInput;
+
+if RunService:IsStudio() then
+    u1.InputMode.Changed:Connect(function() -- Line: 205, Name: InputModeChanged
+        -- upvalues: u1 (copy)
+        warn("Input mode changed: ", u1.InputMode.Value);
+    end);
+    warn("Input mode changed: ", u1.InputMode.Value);
+end;
+
+return u1;
+
+
+Templates
+
+-- Script Path: game:GetService("ReplicatedStorage").Shared.Data.Challenges.Templates
+-- Took 0.01s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local u1 = {};
+local u2 = {};
+
+local function register(p3: table) -- Line: 327
+    -- upvalues: u1 (copy), u2 (copy)
+    for _, v in p3 do
+        local v4 = v;
+        local v5 = -1;
+
+        for i in v.slots do
+            if v5 < i then
+                v5 = i;
+            end;
+        end;
+
+        v4.slotCount = v5 + 1;
+        table.insert(u1, v4);
+        assert(not u2[v4.id], "[ChallengeTemplates] Duplicate id: " .. v4.id);
+        u2[v4.id] = v4;
+    end;
+end;
+
+register({
+    {
+        id = "survive_3",
+        description = "Survive 3 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 3
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 100
+            } }
+    },
+    {
+        id = "survive_5",
+        description = "Survive 5 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 5
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 200
+            } }
+    },
+    {
+        id = "revive_3",
+        description = "Revive 3 teammates",
+        slots = { {
+                goalType = "revive",
+                target = 3
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 120
+            } }
+    },
+    {
+        id = "revive_5",
+        description = "Revive 5 teammates",
+        slots = { {
+                goalType = "revive",
+                target = 5
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 250
+            } }
+    },
+    {
+        id = "escape_1",
+        description = "Escape the map",
+        slots = { {
+                goalType = "escape",
+                target = 1
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 150
+            } }
+    },
+    {
+        id = "escape_3",
+        description = "Escape 3 times",
+        slots = { {
+                goalType = "escape",
+                target = 3
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 350
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 5
+            } }
+    },
+    {
+        id = "use_item_5",
+        description = "Use 5 items",
+        slots = { {
+                goalType = "use_item",
+                target = 5
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 80
+            } }
+    },
+    {
+        id = "play_5",
+        description = "Complete 5 rounds",
+        slots = { {
+                goalType = "play",
+                target = 5
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 100
+            } }
+    },
+    {
+        id = "play_10",
+        description = "Complete 10 rounds",
+        slots = { {
+                goalType = "play",
+                target = 10
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 250
+            } }
+    },
+    {
+        id = "stun_3",
+        description = "Stun entities 3 times",
+        slots = { {
+                goalType = "stun",
+                target = 3
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 100
+            } }
+    }
+});
+register({
+    {
+        id = "w_survive_20",
+        description = "Survive 20 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 20
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 800
+            }, {
+                type = "Experience",
+                amount = 200
+            } }
+    },
+    {
+        id = "w_survive_35",
+        description = "Survive 35 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 35
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 1500
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 15
+            } }
+    },
+    {
+        id = "w_revive_15",
+        description = "Revive 15 teammates",
+        slots = { {
+                goalType = "revive",
+                target = 15
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 600
+            }, {
+                type = "Experience",
+                amount = 150
+            } }
+    },
+    {
+        id = "w_revive_25",
+        description = "Revive 25 teammates",
+        slots = { {
+                goalType = "revive",
+                target = 25
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 1200
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 10
+            } }
+    },
+    {
+        id = "w_escape_10",
+        description = "Escape 10 times",
+        slots = { {
+                goalType = "escape",
+                target = 10
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 1000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 12
+            } }
+    },
+    {
+        id = "w_play_30",
+        description = "Complete 30 rounds",
+        slots = { {
+                goalType = "play",
+                target = 30
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 700
+            }, {
+                type = "Experience",
+                amount = 300
+            } }
+    },
+    {
+        id = "w_play_50",
+        description = "Complete 50 rounds",
+        slots = { {
+                goalType = "play",
+                target = 50
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 1500
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 20
+            } }
+    },
+    {
+        id = "w_stun_15",
+        description = "Stun entities 15 times",
+        slots = { {
+                goalType = "stun",
+                target = 15
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 500
+            }, {
+                type = "Experience",
+                amount = 100
+            } }
+    },
+    {
+        id = "w_use_item_25",
+        description = "Use 25 items",
+        slots = { {
+                goalType = "use_item",
+                target = 25
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 400
+            }, {
+                type = "Experience",
+                amount = 120
+            } }
+    }
+});
+register({
+    {
+        id = "m_survive_100",
+        description = "Survive 100 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 100
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 5000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 50
+            }, {
+                type = "Experience",
+                amount = 1000
+            } }
+    },
+    {
+        id = "m_survive_60",
+        description = "Survive 60 rounds",
+        slots = { {
+                goalType = "survive",
+                target = 60
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 3000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 25
+            } }
+    },
+    {
+        id = "m_revive_50",
+        description = "Revive 50 teammates",
+        slots = { {
+                goalType = "revive",
+                target = 50
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 3000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 30
+            }, {
+                type = "Experience",
+                amount = 500
+            } }
+    },
+    {
+        id = "m_escape_30",
+        description = "Escape 30 times",
+        slots = { {
+                goalType = "escape",
+                target = 30
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 4000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 40
+            }, {
+                type = "Experience",
+                amount = 750
+            } }
+    },
+    {
+        id = "m_play_150",
+        description = "Complete 150 rounds",
+        slots = { {
+                goalType = "play",
+                target = 150
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 5000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 50
+            }, {
+                type = "Experience",
+                amount = 1200
+            } }
+    },
+    {
+        id = "m_play_80",
+        description = "Complete 80 rounds",
+        slots = { {
+                goalType = "play",
+                target = 80
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 2500
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 20
+            } }
+    },
+    {
+        id = "m_stun_60",
+        description = "Stun entities 60 times",
+        slots = { {
+                goalType = "stun",
+                target = 60
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 2500
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 25
+            }, {
+                type = "Experience",
+                amount = 400
+            } }
+    },
+    {
+        id = "m_use_item_100",
+        description = "Use 100 items",
+        slots = { {
+                goalType = "use_item",
+                target = 100
+            } },
+        rewards = { {
+                type = "Currency",
+                key = "Tokens",
+                amount = 2000
+            }, {
+                type = "Currency",
+                key = "Points",
+                amount = 20
+            }, {
+                type = "Experience",
+                amount = 500
+            } }
+    }
+});
+
+return {
+    List = u1,
+    ById = u2
+};
+
+
+core
+
+-- Script Path: game:GetService("ReplicatedStorage").Core
+-- Took 0.01s to decompile.
+-- Executor: Potassium (v2.5.1)
+
+-- Decompiled with Potassium's decompiler.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local Events = ReplicatedStorage:WaitForChild("Events");
+local Services = ReplicatedStorage:WaitForChild("Services");
+local Players = game:GetService("Players");
+local Info = ReplicatedStorage:WaitForChild("Info");
+local Debug = require(Info:WaitForChild("Debug"));
+local KeybindService = require(Services:WaitForChild("Client"):WaitForChild("KeybindService"));
+local SharedUIService = require(Services:WaitForChild("UI"):WaitForChild("SharedUIService"));
+require(Services:WaitForChild("UI"):WaitForChild("PopupService"));
+local MenuService = require(Services:WaitForChild("UI"):WaitForChild("MenuService"));
+require(Services:WaitForChild("Other"):WaitForChild("DebugService"));
+require(Services:WaitForChild("Data"):WaitForChild("ServerStateRegistryService"));
+require(Services:WaitForChild("Asset"):WaitForChild("CharacterService"));
+local MapService = require(Services:WaitForChild("Asset"):WaitForChild("MapService"));
+require(Services:WaitForChild("Asset"):WaitForChild("InteractionService"));
+require(Services:WaitForChild("Client"):WaitForChild("CameraService"));
+require(Services:WaitForChild("Client"):WaitForChild("InputService"));
+require(Services:WaitForChild("Client"):WaitForChild("VoiceService"));
+require(Services:WaitForChild("Asset"):WaitForChild("CollectablesService"));
+require(Services:WaitForChild("Other"):WaitForChild("GameDebugBootstrapService"));
+local v1 = game:GetService("RunService"):IsStudio();
+local v2 = {};
+
+repeat
+    task.wait();
+until workspace:GetAttribute("Loaded");
+
+task.spawn(function() -- Line: 40
+    -- upvalues: Events (copy), Players (copy)
+    repeat
+        Events:WaitForChild("NotifyReady"):FireServer();
+        task.wait(5);
+    until Players.LocalPlayer:GetAttribute("AllReady");
+end);
+SharedUIService:Insert();
+
+if not (Debug.InstantSpawn and v1) then
+    MenuService:Insert();
+    MenuService.SpawnInserted = true;
+end;
+
+require(Services:WaitForChild("UI"):WaitForChild("ChatService"));
+require(Services:WaitForChild("Client"):WaitForChild("RelicsService"));
+KeybindService:SetupServiceList();
+MapService:SetMap(workspace:WaitForChild("Map"));
+ReplicatedStorage.Events.NotifyReady:FireServer();
+
+return v2;
+
